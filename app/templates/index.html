@@ -1,0 +1,127 @@
+<!doctype html>
+<html ng-app="MyApp">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+  <!-- Angular Material Dependencies -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular-animate.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular-aria.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular-messages.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular-cookies.min.js"></script>
+
+  <!-- Angular material -->
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.9/angular-material.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.9/angular-material.min.js"></script>
+
+  <!-- Custom files -->
+  <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="static/images/favicon.png" type="image/x-icon" />
+  <script src="static/main.js"></script>
+  <script src="static/controller.js"></script>
+  <link rel=stylesheet type=text/css href="static/styles/style.css">
+
+  <title>Excel To Confluence</title>
+
+</head>
+<body ng-controller="MainController">
+  <md-content>
+    <md-toolbar class="title">
+      <md-icon class="title-icon" md-svg-src="static/images/logo.svg"></md-icon>
+      <h2 flex md-truncate>Export an excel file into confluence</h2>
+    </md-toolbar>
+  </md-content>
+
+  <md-content>
+    <md-card>
+      <div id="dropArea" ng-class="{hovering: hovering}">
+        <md-card-title>
+          <md-card-title-text>
+            <span class="md-headline">Drag & Drop your excel file here</span>
+            <span class="md-subhead">Drop your Excel file here to start the convertion to confluence table code</span>
+          </md-card-title-text>
+        </md-card-title>
+      </div>
+    </md-card>
+
+    <md-progress-linear md-mode="indeterminate" ng-if="loading || confluenceService.loading"></md-progress-linear>
+
+    <md-card ng-if="workbook !== null">
+      <md-toolbar md-scroll-shrink>
+        <div class="md-toolbar-tools">Export filtering</div>
+      </md-toolbar>
+      <md-card-content>
+        <md-input-container>
+          <label>sheet</label>
+          <md-select ng-model="selection.sheet" ng-change="handleExcelFile()">
+            <md-option ng-repeat="sheet in sheets" ng-value="sheet">
+              {{sheet}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+        <div layout-gt-sm="row">
+          <p class="label">Configured column selections: </p>
+          <div>
+            <div ng-repeat="table in confluence.tables track by $index">
+              <span class="primary">{{table.title}}: </span><span class="detail" ng-repeat="(name, column) in table.data track by $index">{{name + ", "}}</span>
+            </div>
+          </div>
+        </div>
+
+      </md-card>
+
+      <md-card ng-if="data !== null">
+        <md-toolbar md-scroll-shrink>
+          <div class="md-toolbar-tools">Confluence Update</div>
+        </md-toolbar>
+        <md-nav-bar
+          md-no-ink-bar="disableInkBar"
+          md-selected-nav-item="'upload'"
+          nav-bar-aria-label="navigation links">
+          <md-nav-item md-nav-click="goto('upload')" name="upload">Auto Upload to confluence</md-nav-item>
+          <md-nav-item md-nav-click="goto('copy')" name="copy">Manual Copy Paste</md-nav-item>
+        </md-nav-bar>
+
+        <div class="block" layout-gt-sm="row" ng-if="mode == 'upload'">
+          <md-input-container class="md-block" flex-gt-sm>
+            <label>Confluence Page Id</label>
+            <input ng-model="confluence.pageId" placeholder="PageId">
+          </md-input-container>
+          <md-input-container class="md-block" flex-gt-sm>
+            <label>Confluence Page Title</label>
+            <input ng-model="confluence.pageTitle" placeholder="PageTitle">
+          </md-input-container>
+          <md-button class="md-raised md-primary" ng-click="updateConfluencePage($event)" ng-disabled="confluence.title === null || confluence.version === null">
+            Update
+          </md-button>
+        </div>
+
+        <div class="block" layout-gt-sm="row" ng-if="mode == 'copy'">
+          <p class="label">Copy paste to confluence: </p>
+          <md-button class="md-raised md-primary" ng-click="toClipboard()">
+            <md-tooltip md-direction="bottom">Paste the clipboard content to your confluence page code edition.</md-tooltip>
+            Copy to clipboard
+          </md-button>
+        </div>
+      </md-card-content>
+
+      <md-content class="clipboard-div" ng-if="mode == 'copy'">
+        <md-button
+             title="Copy to clipboard"
+             aria-label="Copy code to clipboard"
+             class="md-icon-button launch clipboard-button"
+             ng-click="toClipboard()">
+         <md-tooltip md-direction="left">Paste the clipboard content to your confluence page code edition.</md-tooltip>
+          <md-icon md-svg-icon="static/images/clipboard.svg"></md-icon>
+        </md-button>
+        <pre id="confluenceData">{{confluence.pageData}}</pre>
+      </md-content>
+    </md-card>
+
+  </md-content>
+<md-card class="footer">
+  <div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+  <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+</md-card>
+</body>
+</html>

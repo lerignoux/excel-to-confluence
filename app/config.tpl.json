@@ -1,0 +1,10 @@
+{
+  "api": {
+    "secreat_key": "<to fill>"
+  },
+  "confluence": {
+    "host": "",
+    "login": "",
+    "password": ""
+  }
+}

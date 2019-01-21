@@ -1,4 +1,4 @@
-import setup_logging
+import logging
 import aiohttp
 
 log = logging.getLogger(__name__)

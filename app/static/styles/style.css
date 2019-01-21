@@ -1,0 +1,97 @@
+body {
+  color: #dddddd;
+  max-width: 80%;
+  margin-left: 10%;
+}
+
+md-toolbar.title {
+  display: flex;
+  flex-direction: row;
+  color: #ffffff;
+}
+
+.title-icon {
+  width: 50px;
+}
+
+.title h2 {
+  width: 100%;
+  font-size: 0.9em;
+  padding-top: 0.2em;
+}
+
+md-toast.md-center {
+  left: 50%;
+  transform: translate3d(-50%, 0, 0);
+}
+
+md-toast.md-success-toast-theme .md-toast-content{
+  background-color: green;
+}
+
+md-toast.md-failure-toast-theme .md-toast-content{
+  background-color: red;
+}
+
+.banner-image {
+  max-width: 60%;
+  margin: auto;
+}
+
+.md-headline, .md-subhead {
+  margin: auto;
+}
+
+.md-subhead {
+  color: #888888;
+}
+
+.clipboard-div {
+  position: relative;
+  background-color: #222;
+  padding: 10px;
+}
+
+.clipboard-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+pre {
+  max-height: 600px;
+  overflow-y: scroll;
+}
+
+.footer {
+  font-size: 0.7em;
+  color: #777777;
+}
+
+.footer a {
+  color: #777777;
+}
+
+.hovering, #dropArea:hover {
+  background-color: #333333;
+  border: 2px dashed #aaaaaa;
+  cursor: pointer;
+  z-index: 999;
+}
+
+.label {
+  width: 300px;
+  min-width: 300px;
+}
+
+.block {
+  margin: 16px;
+}
+
+.primary {
+  color: #4CAF50;
+}
+
+.detail {
+  font-size: 0.8em;
+}
