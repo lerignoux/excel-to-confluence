@@ -4,7 +4,7 @@ import aiohttp
 log = logging.getLogger(__name__)
 
 
-class ConfluenceExport():
+class ConfluenceExporter():
 
     def __init__(self, config):
         self.config = config
@@ -23,6 +23,9 @@ class ConfluenceExport():
         Create the html data content from the data
         """
 
-    def generate_confluence_page(self, page_config, content):
+    async def generate_confluence_page(self, page_config, content):
+        """
+        enerate the confluence page data
+        """
         page_content = self.format_page(content)
         return await self.export_page(page_config['page_id'], page_content)

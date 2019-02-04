@@ -1,6 +1,6 @@
 {
   "api": {
-    "secreat_key": "<to fill>"
+    "secret_key": "<to fill>"
   },
   "confluence": {
     "host": "",

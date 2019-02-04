@@ -15,15 +15,9 @@ parser.add_argument('--debug', '-d', dest='debug',
                     help='Debug mode')
 
 
-def get_config(project=None):
+def get_config():
     with open('config.json', 'r') as f:
-        conf = json.load(f)
-    if project is None:
-        return conf
-    else:
-        projects = conf.pop('projects')
-        conf.update(projects[project])
-        return conf
+        return json.load(f)
 
 
 app = Flask(__name__)
