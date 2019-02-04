@@ -97,11 +97,11 @@ pre {
 }
 
 .confluence-preview {
-	background-color: #ffffff;
 	padding: 20px;
 }
 
 .confluence-preview > table {
+	background-color: #aaaaaa;
 	width: 100%;
 	border-collapse: collapse;
 	border: 1px solid #888888;

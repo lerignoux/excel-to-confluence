@@ -22,6 +22,8 @@
         header: ""
       }
 
+      $scope.excelMode = 'config';
+      $scope.confluenceMode = 'upload';
       $scope.loading = 0;
 
       $scope.onOver = function(e) {
@@ -33,7 +35,10 @@
       };
 
       $scope.goto = function(page) {
-        $scope.mode = page;
+        if (page == 'config' || page == 'preview') {
+          $scope.excelMode = page
+        }
+        $scope.confluenceMode = page;
       };
 
       $scope.cancel = function(e) {
