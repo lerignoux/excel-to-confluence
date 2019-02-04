@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+from io import BytesIO
 from flask import Flask, render_template, request
 
 from confluence.confluence_exporter import ConfluenceExporter
@@ -8,6 +9,7 @@ from excel.excel_reader import ExcelReader
 
 
 log = logging.getLogger("excel-to-confluence")
+
 
 parser = argparse.ArgumentParser(description='Export an excel file into a confluence page.')
 parser.add_argument('--debug', '-d', dest='debug',
@@ -59,9 +61,15 @@ def excel():
     """
     Post an excel file and fetch it's configuration
     """
-    excel_file = request.json['file']
+    sheet = None
+    header_row = None
+    excel_file = request.files['file']
+    if request.json:
+        sheet = request.json.get('sheet')
+        header_row = request.json.get('header_row')
 
-    return json.dumps({})
+    reader = ExcelReader(get_config(), excel_file._file)
+    return json.dumps(reader.parse(sheet=sheet, header_row=header_row))
 
 
 if __name__ == "__main__":
