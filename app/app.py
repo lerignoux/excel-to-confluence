@@ -64,10 +64,11 @@ def excel():
     sheet = None
     header_row = None
     excel_file = request.files['file']
-    if request.json:
-        sheet = request.json.get('sheet')
-        header_row = request.json.get('header_row')
-
+    sheet = request.values.get('sheet')
+    try:
+        header_row = int(request.values.get('header_row'))
+    except TypeError:
+        header_row = None
     reader = ExcelReader(get_config(), excel_file._file)
     return json.dumps(reader.parse(sheet=sheet, header_row=header_row))
 

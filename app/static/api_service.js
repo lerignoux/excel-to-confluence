@@ -40,6 +40,9 @@ ApiService.factory('ApiService', ['$http', '$window', '$log', '$mdToast', functi
       }
       var formData = new FormData();
       formData.append('file', file);
+      angular.forEach(params, function(value, name) {
+        formData.append(name, value)
+      })
       $http.post(urlBase + endpoint, formData, {transformRequest: angular.identity, headers: headers}).
       then(function(response) {
         $log.log(endpoint + " file post successfull.");
