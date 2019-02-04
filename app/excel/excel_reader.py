@@ -19,7 +19,9 @@ class ExcelReader():
             header_row = self.best_header_row(ws)
         return {
             'sheets': self.get_sheets(),
-            'data': self.parse_sheet(ws, header_row)
+            'data': self.parse_sheet(ws, header_row),
+            'header_row': header_row,
+            'sheet': sheet
         }
 
     def get_sheets(self):
@@ -31,7 +33,7 @@ class ExcelReader():
     def parse_sheet(self, ws, header_row):
         return {
             ws.title: [
-                self.get_row(ws, row) for row in list(ws.iter_rows())[header_row:]
+                self.get_row(ws, row) for row in list(ws.iter_rows())[header_row-1:]
             ]
         }
 
