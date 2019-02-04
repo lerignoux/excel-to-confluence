@@ -47,19 +47,12 @@
 
     <md-progress-linear md-mode="indeterminate" ng-if="loading || confluenceService.loading"></md-progress-linear>
 
-    <md-card ng-if="sheets !== null">
+    <md-card ng-if="excel.sheets.length > 0">
       <md-toolbar md-scroll-shrink>
-        <div class="md-toolbar-tools">Data configuration</div>
+        <div class="md-toolbar-tools">Excel configuration</div>
       </md-toolbar>
-      <md-nav-bar
-        md-no-ink-bar="disableInkBar"
-        md-selected-nav-item="'config'"
-        nav-bar-aria-label="navigation links">
-        <md-nav-item md-nav-click="goto('config')" name="config">Excel configuration</md-nav-item>
-        <md-nav-item md-nav-click="goto('preview')" name="preview">Data preview</md-nav-item>
-      </md-nav-bar>
 
-      <md-card-content ng-if="excelMode == 'config'">
+      <md-card-content>
         <div class="block" layout-gt-sm="row">
           <md-input-container>
             <label>sheet</label>
@@ -76,25 +69,16 @@
           </md-input-container>
         </div>
       </md-card-content>
-      <md-card-content ng-if="excelMode == 'preview'" class="confluence-preview">
-        <table ng-repeat="(sheet, columns) in data">
-          <tr ng-repeat="column in columns">
-            <td ng-repeat="row in column" ng-style="row.style">
-              {{row.value}}
-            </td>
-          </td>
-        </table>
-      </md-card-content>
     </md-card>
 
 
-    <md-card ng-if="data !== null">
+    <md-card ng-if="data !== undefined">
       <md-toolbar md-scroll-shrink>
         <div class="md-toolbar-tools">Confluence Export</div>
       </md-toolbar>
       <md-nav-bar
         md-no-ink-bar="disableInkBar"
-        md-selected-nav-item="'upload'"
+        md-selected-nav-item="confluenceMode"
         nav-bar-aria-label="navigation links">
         <md-nav-item md-nav-click="goto('upload')" name="upload">Auto Upload to confluence</md-nav-item>
         <md-nav-item md-nav-click="goto('copy')" name="copy">Manual Copy Paste</md-nav-item>
@@ -113,6 +97,19 @@
           <md-button class="md-raised md-primary" ng-click="uploadtoConfluence($event)" ng-disabled="data === undefined">
             Upload
           </md-button>
+        </div>
+        <div class="confluence-preview">
+          <h3>Preview</h3>
+          <p ng-if="confluence.header">
+            {{confluence.header}}
+          </p>
+          <table ng-repeat="(sheet, columns) in data">
+            <tr ng-repeat="column in columns">
+              <td ng-repeat="row in column" ng-style="row.style">
+                {{row.value}}
+              </td>
+            </td>
+          </table>
         </div>
       </md-card-content>
 

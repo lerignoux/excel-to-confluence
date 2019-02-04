@@ -84,10 +84,6 @@ pre {
   min-width: 300px;
 }
 
-.block {
-  margin: 16px;
-}
-
 .primary {
   color: #4CAF50;
 }
@@ -98,6 +94,10 @@ pre {
 
 .confluence-preview {
 	padding: 20px;
+}
+
+.confluence-preview > h3 {
+	color: #aaaaaa;
 }
 
 .confluence-preview > table {

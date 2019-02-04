@@ -6,25 +6,21 @@
     function($scope, $mdToast, $templateRequest, $sce, $timeout, ApiService) {
 
       $scope.ApiService = ApiService;
-      $scope.workbook = null;
-      $scope.data = null;
-      $scope.sheets = [];
 
+      $scope.confluenceMode = 'upload';
+      $scope.loading = 0;
+
+      $scope.data = undefined;
       $scope.excel = {
         sheets: [],
         sheet: undefined,
         headerRow: undefined,
       }
-
       $scope.confluence = {
         pageId: undefined,
         pageTitle: undefined,
         header: ""
       }
-
-      $scope.excelMode = 'config';
-      $scope.confluenceMode = 'upload';
-      $scope.loading = 0;
 
       $scope.onOver = function(e) {
        angular.element(e.target).addClass("hover");
@@ -35,15 +31,26 @@
       };
 
       $scope.goto = function(page) {
-        if (page == 'config' || page == 'preview') {
-          $scope.excelMode = page
-        }
         $scope.confluenceMode = page;
       };
 
       $scope.cancel = function(e) {
         if (e.preventDefault) { e.preventDefault(); }
         return false;
+      }
+
+      $scope.init = function() {
+        $scope.data = undefined;
+        $scope.excel = {
+          sheets: [],
+          sheet: undefined,
+          headerRow: undefined,
+        }
+        $scope.confluence = {
+          pageId: undefined,
+          pageTitle: undefined,
+          header: ""
+        }
       }
 
       $scope.handleDrop = function(e) {
@@ -53,6 +60,7 @@
         e.preventDefault();
         $scope.filename = e.dataTransfer.files[0].name;
         $scope.file = e.dataTransfer.files[0];
+        $scope.init();
         $scope.checkWorkbook();
         $scope.loading -= 1;
       }
@@ -68,7 +76,7 @@
         }
         ApiService.post_file("excel", $scope.file, conf, function(data) {
           $scope.excel.sheets = data.sheets;
-          $scope.excel.header_row = data.header_row
+          $scope.excel.header_row = data.header_row;
           $scope.data = data.data;
           $scope.confluence.source = data.source;
         })
