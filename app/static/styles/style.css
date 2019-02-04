@@ -95,3 +95,23 @@ pre {
 .detail {
   font-size: 0.8em;
 }
+
+.confluence-preview {
+	background-color: #ffffff;
+	padding: 20px;
+}
+
+.confluence-preview > table {
+	width: 100%;
+	border-collapse: collapse;
+	border: 1px solid #888888;
+}
+
+.confluence-preview tr {
+	min-height: 60px;
+ }
+
+.confluence-preview td {
+ 	border: 1px solid #888888;
+	padding: 4px;
+}

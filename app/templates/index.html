@@ -47,33 +47,30 @@
 
     <md-progress-linear md-mode="indeterminate" ng-if="loading || confluenceService.loading"></md-progress-linear>
 
-    <md-card ng-if="workbook !== null">
+    <md-card ng-if="sheets !== null">
       <md-toolbar md-scroll-shrink>
-        <div class="md-toolbar-tools">Export filtering</div>
+        <div class="md-toolbar-tools">Data configuration</div>
       </md-toolbar>
       <md-card-content>
         <md-input-container>
           <label>sheet</label>
-          <md-select ng-model="selection.sheet" ng-change="handleExcelFile()">
-            <md-option ng-repeat="sheet in sheets" ng-value="sheet">
+          <md-select ng-model="sheet" ng-change="checkWorkbook">
+            <md-option ng-repeat="sheet in sheets" ng-value="sheet" ng-selected="data[sheet] !== undefined">
               {{sheet}}
             </md-option>
           </md-select>
         </md-input-container>
-        <div layout-gt-sm="row">
-          <p class="label">Configured column selections: </p>
-          <div>
-            <div ng-repeat="table in confluence.tables track by $index">
-              <span class="primary">{{table.title}}: </span><span class="detail" ng-repeat="(name, column) in table.data track by $index">{{name + ", "}}</span>
-            </div>
-          </div>
+        <md-input-container>
+          <label>Header Row</label>
+          <input ng-model="excel.header_row" ng-change="checkWorkbook" type="number">
+          </input>
+        </md-input-container>
         </div>
-
       </md-card>
 
       <md-card ng-if="data !== null">
         <md-toolbar md-scroll-shrink>
-          <div class="md-toolbar-tools">Confluence Update</div>
+          <div class="md-toolbar-tools">Confluence Information</div>
         </md-toolbar>
         <md-nav-bar
           md-no-ink-bar="disableInkBar"
@@ -92,8 +89,8 @@
             <label>Confluence Page Title</label>
             <input ng-model="confluence.pageTitle" placeholder="PageTitle">
           </md-input-container>
-          <md-button class="md-raised md-primary" ng-click="updateConfluencePage($event)" ng-disabled="confluence.title === null || confluence.version === null">
-            Update
+          <md-button class="md-raised md-primary" ng-click="uploadtoConfluence($event)" ng-disabled="data === null || data === undefined">
+            Upload
           </md-button>
         </div>
 
@@ -115,9 +112,19 @@
          <md-tooltip md-direction="left">Paste the clipboard content to your confluence page code edition.</md-tooltip>
           <md-icon md-svg-icon="static/images/clipboard.svg"></md-icon>
         </md-button>
-        <pre id="confluenceData">{{confluence.pageData}}</pre>
+        <pre id="confluenceData">{{source}}</pre>
       </md-content>
     </md-card>
+
+    <md-card ng-if="data !== null" class="confluence-preview">
+      <table ng-repeat="(sheet, columns) in data">
+        <tr ng-repeat="column in columns">
+          <td ng-repeat="row in column" ng-style="row.style">
+            {{row.value}}
+          </td>
+        </td>
+      </table>
+  </md-card>
 
   </md-content>
 <md-card class="footer">

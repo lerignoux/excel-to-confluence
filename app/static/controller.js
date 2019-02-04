@@ -11,13 +11,14 @@
       $scope.sheets = [];
 
       $scope.excel = {
-        sheet: null,
-        columns: []
+        sheets: [],
+        sheet: undefined,
+        headerRow: undefined,
       }
 
       $scope.confluence = {
-        pageId: null,
-        pageTitle: null,
+        pageId: undefined,
+        pageTitle: undefined,
         header: ""
       }
 
@@ -46,11 +47,26 @@
         e.stopPropagation();
         e.preventDefault();
         $scope.filename = e.dataTransfer.files[0].name;
-        var file = e.dataTransfer.files, f = e.dataTransfer.files[0];
-        ApiService.post("excel", {'file': file}, function(data) {
-          console.log(data)
-        })
+        $scope.file = e.dataTransfer.files[0];
+        $scope.checkWorkbook();
         $scope.loading -= 1;
+      }
+
+      $scope.checkWorkbook = function() {
+        var conf = {
+        }
+        if ($scope.excel.sheet !== undefined){
+          conf.sheet = $scope.excel.sheet
+        }
+        if ($scope.excel.header_row !== undefined){
+          conf.header_row = $scope.excel.header_row
+        }
+        ApiService.post_file("excel", $scope.file, conf, function(data) {
+          $scope.excel.sheets = data.sheets;
+          $scope.excel.header_row = data.header_row
+          $scope.data = data.data;
+          $scope.confluence.source = data.source;
+        })
       }
 
       document.getElementById('dropArea').addEventListener('drop', $scope.handleDrop, false);
@@ -64,8 +80,8 @@
         $timeout(function() {$scope.hovering = false; $scope.$apply();}, 3000);
       }, false);
 
-      $scope.updateConfluencePage = function(ev) {
-        $scope.ApiService.post("confluence", ev, {'data': $scope.confluence.pageData, 'page_id': $scope.confluence.pageId, 'page_title': $scope.confluence.pageTitle})
+      $scope.confluenceUpload = function(ev) {
+        $scope.ApiService.post("confluence", ev, {'data': $scope.data, 'page_id': $scope.confluence.pageId, 'page_title': $scope.confluence.pageTitle})
       }
 
       $scope.showErrorToast = function(message) {

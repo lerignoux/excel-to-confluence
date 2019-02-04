@@ -33,6 +33,35 @@ ApiService.factory('ApiService', ['$http', '$window', '$log', '$mdToast', functi
       });
     };
 
+    Api.post_file = function(endpoint, file, params, cb) {
+      Api.loading += 1;
+      headers = {
+        'Content-Type': undefined
+      }
+      var formData = new FormData();
+      formData.append('file', file);
+      $http.post(urlBase + endpoint, formData, {transformRequest: angular.identity, headers: headers}).
+      then(function(response) {
+        $log.log(endpoint + " file post successfull.");
+        Api.loading -= 1;
+        cb(response.data);
+      }).
+      catch(function(response) {
+        $log.log(response.data);
+        Api.loading -= 1;
+        if (response.status == 401) {
+          Api.showErrorToast("Unauthorized.");
+        }
+        else if (response.status == 503) {
+          Api.showErrorToast("Temporary error, please try again later.");
+        }
+        else {
+          console.log(response);
+          Api.showErrorToast();
+        }
+      });
+    };
+
     Api.post = function(endpoint, params, cb) {
       Api.loading += 1;
       headers = {};
