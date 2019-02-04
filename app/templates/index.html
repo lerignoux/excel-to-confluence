@@ -4,19 +4,20 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
   <!-- Angular Material Dependencies -->
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular-animate.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular-aria.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular-messages.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular-cookies.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-messages.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-cookies.min.js"></script>
 
   <!-- Angular material -->
-  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.9/angular-material.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.9/angular-material.min.js"></script>
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.js"></script>
 
   <!-- Custom files -->
   <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="static/images/favicon.png" type="image/x-icon" />
+  <script src="static/api_service.js"></script>
   <script src="static/main.js"></script>
   <script src="static/controller.js"></script>
   <link rel=stylesheet type=text/css href="static/styles/style.css">
@@ -24,6 +25,7 @@
   <title>Excel To Confluence</title>
 
 </head>
+{% raw %}
 <body ng-controller="MainController">
   <md-content>
     <md-toolbar class="title">
@@ -31,7 +33,6 @@
       <h2 flex md-truncate>Export an excel file into confluence</h2>
     </md-toolbar>
   </md-content>
-
   <md-content>
     <md-card>
       <div id="dropArea" ng-class="{hovering: hovering}">
@@ -123,5 +124,6 @@
   <div>Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
   <div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 </md-card>
+{% endraw %}
 </body>
 </html>

@@ -2,7 +2,7 @@
 
   'use strict';
 
-  angular.module('MyApp').controller('MainController', ['$scope', '$mdToast', '$templateRequest', '$sce', '$timeout', 'ConfluenceService',
+  angular.module('MyApp').controller('MainController', ['$scope', '$mdToast', '$templateRequest', '$sce', '$timeout', 'ApiService',
     function($scope, $mdToast, $templateRequest, $sce, $timeout, ApiService) {
 
       $scope.ApiService = ApiService;
@@ -22,14 +22,6 @@
       }
 
       $scope.loading = 0;
-
-
-      $scope.templatesLoaded = function(){
-        if ($scope.confluence.confluenceTemplate && !$scope.templates.confluence) {return false;}
-        if ($scope.confluence.headerTemplate && !$scope.templates.header) {return false;}
-        if ($scope.confluence.tableSectionTemplate && !$scope.templates.tableSection) {return false;}
-        return true;
-      }
 
       $scope.onOver = function(e) {
        angular.element(e.target).addClass("hover");
@@ -54,8 +46,10 @@
         e.stopPropagation();
         e.preventDefault();
         $scope.filename = e.dataTransfer.files[0].name;
-        var file = e.dataTransfer.files, f = files[0];
-        ApiService.post_data("excel", ev, {'file': file})
+        var file = e.dataTransfer.files, f = e.dataTransfer.files[0];
+        ApiService.post("excel", {'file': file}, function(data) {
+          console.log(data)
+        })
         $scope.loading -= 1;
       }
 
@@ -70,23 +64,8 @@
         $timeout(function() {$scope.hovering = false; $scope.$apply();}, 3000);
       }, false);
 
-      $scope.selectSheet = function() {
-        $scope.sheets = Object.keys(config[$scope.filename]);
-        if(config[$scope.filename] !== undefined) {
-          $scope.excel.sheet = $scope.sheets[0]
-          $scope.handleExcelFile();
-
-      }
-
-      $scope.selectColumns = function() {
-        $scope.sheets = Object.keys(config[$scope.filename]);
-        if(config[$scope.filename] !== undefined) {
-          $scope.excel.sheet = $scope.sheets[0]
-          $scope.handleExcelFile();
-      }
-
       $scope.updateConfluencePage = function(ev) {
-        ApiService.post_data("confluence", ev, {'data': $scope.confluence.pageData, 'page_id': $scope.confluence.pageId, 'page_title': $scope.confluence.pageTitle})
+        $scope.ApiService.post("confluence", ev, {'data': $scope.confluence.pageData, 'page_id': $scope.confluence.pageId, 'page_title': $scope.confluence.pageTitle})
       }
 
       $scope.showErrorToast = function(message) {
@@ -97,7 +76,7 @@
             .hideDelay(10000)
             .theme("failure-toast")
         );
-      };
+      }
 
       $scope.showSuccessToast = function(message) {
         $mdToast.show(
@@ -107,7 +86,7 @@
             .hideDelay(3000)
             .theme("success-toast")
         );
-      };
+      }
 
     }
   ]);

@@ -33,15 +33,16 @@ ApiService.factory('ApiService', ['$http', '$window', '$log', '$mdToast', functi
       });
     };
 
-    Api.post_data = function(endpoint, params, cb) {
+    Api.post = function(endpoint, params, cb) {
       Api.loading += 1;
+      headers = {};
       $http.post(urlBase + endpoint, params, {headers: headers}).
-      success(function(response) {
+      then(function(response) {
         $log.log(endpoint + " post successfull.");
         Api.loading -= 1;
         cb(response.data);
       }).
-      error(function(response) {
+      catch(function(response) {
         $log.log(response.data);
         Api.loading -= 1;
         if (response.status == 401) {
