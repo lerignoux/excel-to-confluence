@@ -4,8 +4,8 @@ import logging
 from io import BytesIO
 from flask import Flask, render_template, request
 
-from confluence.confluence_exporter import ConfluenceExporter
-from excel.excel_reader import ExcelReader
+from confluence.confluence import Confluence
+from excel.excel import Excel
 
 
 log = logging.getLogger("excel-to-confluence")
@@ -45,17 +45,6 @@ def index():
     return render_template('index.html')
 
 
-@app.route("/confluence", methods=['POST'])
-def confluence():
-    """
-    request to update a confluence page given some data
-    """
-    page_id = request.json['page_id']
-    data = request.json['data']
-
-    return json.dumps({})
-
-
 @app.route("/excel", methods=['POST'])
 def excel():
     """
@@ -69,8 +58,12 @@ def excel():
         header_row = int(request.values.get('header_row'))
     except TypeError:
         header_row = None
-    reader = ExcelReader(get_config(), excel_file._file)
-    return json.dumps(reader.parse(sheet=sheet, header_row=header_row))
+    excel = Excel(get_config(), excel_file._file)
+    confluence = Confluence(get_config())
+    content = excel.parse(sheet=sheet, header_row=header_row)
+    content['header'] = request.values.get('header')
+    content['source'] = confluence.source_from_data(content.data, header=content.get('header'))
+    return json.dumps(content)
 
 
 if __name__ == "__main__":

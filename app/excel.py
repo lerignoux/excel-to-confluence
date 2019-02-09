@@ -5,7 +5,7 @@ from openpyxl import load_workbook
 log = logging.getLogger("excel-to-confluence")
 
 
-class ExcelReader():
+class Excel():
 
     def __init__(self, config, bytes):
         self.config = config

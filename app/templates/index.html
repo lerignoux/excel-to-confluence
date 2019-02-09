@@ -103,10 +103,10 @@
           <p ng-if="confluence.header">
             {{confluence.header}}
           </p>
-          <table ng-repeat="(sheet, columns) in data">
-            <tr ng-repeat="column in columns">
-              <td ng-repeat="row in column" ng-style="row.style">
-                {{row.value}}
+          <table ng-repeat="(sheet, rows) in data">
+            <tr ng-repeat="row in rows">
+              <td ng-repeat="col in row" ng-style="col.style">
+                {{col.value}}
               </td>
             </td>
           </table>
