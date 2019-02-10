@@ -4,8 +4,8 @@ import logging
 from io import BytesIO
 from flask import Flask, render_template, request
 
-from confluence.confluence import Confluence
-from excel.excel import Excel
+from confluence import Confluence
+from excel import Excel
 
 
 log = logging.getLogger("excel-to-confluence")
@@ -29,15 +29,16 @@ app.secret_key = get_config()['api']['secret_key']
 
 @app.before_first_request
 def initialize():
-    logger = logging.getLogger("excel-to-confluence")
-    logger.setLevel(logging.DEBUG)
+    log = logging.getLogger("excel-to-confluence")
+    level = logging.DEBUG if get_config().get('debug', False) else logging.INFO
+    log.setLevel(level)
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(level)
     formatter = logging.Formatter(
         """%(levelname)s in %(module)s [%(pathname)s:%(lineno)d]:\n%(message)s"""
     )
     ch.setFormatter(formatter)
-    logger.addHandler(ch)
+    log.addHandler(ch)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -62,7 +63,7 @@ def excel():
     confluence = Confluence(get_config())
     content = excel.parse(sheet=sheet, header_row=header_row)
     content['header'] = request.values.get('header')
-    content['source'] = confluence.source_from_data(content.data, header=content.get('header'))
+    content['source'] = confluence.source_from_data(content.get('data', {}), header=content.get('header'))
     return json.dumps(content)
 
 

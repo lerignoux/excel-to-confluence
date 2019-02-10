@@ -1,4 +1,5 @@
 {
+  "debug": false,
   "api": {
     "secret_key": "<to fill>"
   },
