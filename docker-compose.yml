@@ -1,0 +1,33 @@
+version: '3.5'
+
+services:
+
+  excel-to-confluence:
+    container_name: excel-to-confluence
+    image: excel-to-confluence
+    build:
+      context: ./app/
+      dockerfile: Dockerfile
+    networks:
+      - excel-to-confluence
+    restart: always
+    volumes:
+      - ./app:/app
+
+  nginx:
+    container_name: excel-to-confluence-nginx
+    image: nginx:stable
+    networks:
+      - excel-to-confluence
+    restart: always
+    depends_on:
+      - excel-to-confluence
+    ports:
+      - 5542:5542
+      - 5543:5543
+      - 443:443
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+networks:
+  excel-to-confluence:
