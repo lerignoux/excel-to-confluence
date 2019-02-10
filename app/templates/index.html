@@ -56,7 +56,7 @@
         <div class="block" layout-gt-sm="row">
           <md-input-container>
             <label>sheet</label>
-            <md-select ng-model="excel.sheet" ng-change="checkWorkbook">
+            <md-select ng-model="excel.sheet" ng-change="checkWorkbook()">
               <md-option ng-repeat="name in excel.sheets" ng-value="name" ng-selected="data[name] !== undefined">
                 {{name}}
               </md-option>
@@ -64,7 +64,7 @@
           </md-input-container>
           <md-input-container>
             <label>Header Row</label>
-            <input ng-model="excel.header_row" ng-change="checkWorkbook" type="number">
+            <input ng-model="excel.header_row" ng-change="checkWorkbook()" type="number">
             </input>
           </md-input-container>
         </div>
