@@ -18,6 +18,7 @@
   <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="static/images/favicon.png" type="image/x-icon" />
   <script src="static/api_service.js"></script>
+  <script src="static/confluence_service.js"></script>
   <script src="static/main.js"></script>
   <script src="static/controller.js"></script>
   <link rel=stylesheet type=text/css href="static/styles/style.css">
@@ -67,6 +68,11 @@
             <input ng-model="excel.header_row" ng-change="checkWorkbook()" type="number">
             </input>
           </md-input-container>
+          <md-input-container>
+            <md-switch ng-model="excel.conditional_formatting" aria-label="conditional_formatting" ng-change="checkWorkbook()">
+              Load conditional formatting (slower)
+            </md-switch>
+          </md-input-container>
         </div>
       </md-card-content>
     </md-card>
@@ -94,7 +100,7 @@
             <label>Confluence Page Title</label>
             <input ng-model="confluence.pageTitle" placeholder="PageTitle">
           </md-input-container>
-          <md-button class="md-raised md-primary" ng-click="uploadtoConfluence($event)" ng-disabled="data === undefined">
+          <md-button class="md-raised md-primary" ng-click="uploadConfluencePage($event)" ng-disabled="data === undefined">
             Upload
           </md-button>
         </div>
