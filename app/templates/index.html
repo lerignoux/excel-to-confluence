@@ -34,6 +34,9 @@
       <h2 flex md-truncate>Export an excel file into confluence</h2>
     </md-toolbar>
   </md-content>
+
+  <md-progress-linear md-mode="indeterminate" ng-if="busy()"></md-progress-linear>
+
   <md-content>
     <md-card>
       <div id="dropArea" ng-class="{hovering: hovering}">
@@ -46,8 +49,6 @@
       </div>
     </md-card>
 
-    <md-progress-linear md-mode="indeterminate" ng-if="loading || confluenceService.loading"></md-progress-linear>
-
     <md-card ng-if="excel.sheets.length > 0">
       <md-toolbar md-scroll-shrink>
         <div class="md-toolbar-tools">Excel configuration</div>
@@ -57,7 +58,7 @@
         <div class="block" layout-gt-sm="row">
           <md-input-container>
             <label>sheet</label>
-            <md-select ng-model="excel.sheet" ng-change="checkWorkbook()">
+            <md-select ng-model="excel.sheet" ng-change="checkWorkbook()" ng-disabled="busy()">
               <md-option ng-repeat="name in excel.sheets" ng-value="name" ng-selected="data[name] !== undefined">
                 {{name}}
               </md-option>
@@ -65,11 +66,11 @@
           </md-input-container>
           <md-input-container>
             <label>Header Row</label>
-            <input ng-model="excel.header_row" ng-change="checkWorkbook()" type="number">
+            <input ng-model="excel.header_row" ng-change="checkWorkbook()" type="number" ng-disabled="busy()">
             </input>
           </md-input-container>
           <md-input-container>
-            <md-switch ng-model="excel.conditional_formatting" aria-label="conditional_formatting" ng-change="checkWorkbook()">
+            <md-switch ng-model="excel.conditional_formatting" aria-label="conditional_formatting" ng-change="checkWorkbook()" ng-disabled="busy()">
               Load conditional formatting (slower)
             </md-switch>
           </md-input-container>
@@ -136,7 +137,7 @@
            <md-tooltip md-direction="left">Paste the clipboard content to your confluence page code edition.</md-tooltip>
             <md-icon md-svg-icon="static/images/clipboard.svg"></md-icon>
           </md-button>
-          <pre id="confluenceData">{{source}}</pre>
+          <pre id="confluence-data">{{confluence.source}}</pre>
         </div>
       </md-card-content>
     </md-card>

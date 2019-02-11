@@ -23,6 +23,10 @@
         header: ""
       }
 
+      $scope.busy = function(){
+        return $scope.ApiService.loading + $scope.ConfluenceService.loading + $scope.loading;
+      }
+
       $scope.onOver = function(e) {
        angular.element(e.target).addClass("hover");
       };
@@ -102,6 +106,16 @@
 
       $scope.uploadConfluencePage = function(ev) {
         $scope.ConfluenceService.updateConfluencePage(ev, $scope.confluence.pageId, $scope.confluence.pageTitle, $scope.confluence.source)
+      }
+
+      $scope.toClipboard = function() {
+          let data = document.getElementById("confluenceData").firstChild.data,
+              copyFrom = document.createElement("textarea");
+          document.body.appendChild(copyFrom);
+          copyFrom.textContent = data;
+          copyFrom.select();
+          document.execCommand("copy");
+          copyFrom.remove();
       }
 
       $scope.showErrorToast = function(message) {

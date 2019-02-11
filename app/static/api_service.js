@@ -3,7 +3,7 @@ ApiService.factory('ApiService', ['$http', '$window', '$log', '$mdToast', functi
 
     var urlBase = '/';
     var Api = {
-      loading: false
+      loading: 0
     };
 
     Api.fetch_data = function(endpoint, params, cb) {
