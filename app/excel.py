@@ -1,7 +1,6 @@
 import logging
 import re
 from openpyxl import load_workbook
-from openpyxl.reader.excle import ExcelReader
 from openpyxl.cell.cell import MergedCell
 
 from colorsys import rgb_to_hls, hls_to_rgb
@@ -16,23 +15,12 @@ log = logging.getLogger("excel-to-confluence")
 class Excel():
 
     def __init__(self, config, bytes, conditional_formatting=True):
-        log.debug(f"initializing Excel file")
+        read_only = not conditional_formatting
+        log.debug(f"initializing Excel file, read_only={read_only}")
         self.config = config
         self.conditional_formatting = conditional_formatting
-        read_only = not conditional_formatting
-        # Not using the default load to keep the reader in order to access full conditional formatting
-        reader = ExcelReader(bytes, read_only=read_only)
-        reader.read()
-        self.wb = reader.wb
-        # self.wb = load_workbook(bytes, read_only=read_only)  # Need write to access conditional formatting rules
-        log.debug(f"Workbook initialized, read_only={read_only}")
-
-    def get_full_conditional(self, ws):
-        for cf in self.parser.formatting:
-            for rule in cf.rules:
-                if rule.dxfId is not None:
-                    rule.dxf = self.ws.parent._differential_styles[rule.dxfId]
-        ws.all_conditional_formatting += rule
+        self.wb = load_workbook(bytes, read_only=read_only)  # Need write to access conditional formatting rules
+        log.debug(f"Workbook initialized")
 
     def parse(self, sheet=None, header_row=None):
         res = {
@@ -45,10 +33,7 @@ class Excel():
             raise Exception(f'Sheet {sheet} not in workbook ({sheets})')
         res['sheet'] = sheet
 
-        self.ws = self.wb.get_sheet_by_name(sheet)
-        if self.conditional_formatting:
-
-            self.conditional_formatting = self.get_full_conditional()
+        ws = self.wb.get_sheet_by_name(sheet)
         self.trim(ws)
         if header_row is None:
             header_row = self.best_header_row(ws)
@@ -67,18 +52,6 @@ class Excel():
     def get_sheets(self):
         return self.wb.get_sheet_names()
 
-    def get_max_row(self, ws):
-        row = ws.max_row
-        while row > 0 and self.empty(ws, row, 'rows'):
-            row -= 1
-        return row
-
-    def get_max_col(self, ws):
-        col = ws.max_col
-        while col > 0 and self.empty(ws, col, 'rows'):
-            col -= 1
-        return col
-
     def trim(self, ws):
         log.debug(f"Starting trimming worsheet")
         precision = 20
@@ -95,42 +68,44 @@ class Excel():
             log.info(f"Removing rows after {last_row}")
             ws.delete_rows(last_row + 1, ws.max_row - last_row)
 
-        last_col = ws.max_column
-        for col in reversed(list(ws.columns)):
-            values = (cell for cell in col[:precision])
-            if self.empty(values):
-                last_col -= 1
-            else:
-                break
-
-        if last_col + 1 <= ws.max_column:
-            log.info(f"Removing empty columns after {last_col}")
-            ws.delete_cols(last_col + 1, ws.max_column - last_col)
-
         # We clean empty columns and lines from the start
         first_row = 0
-        for row in ws.rows:
+        for row in ws.iter_rows():
             values = (cell for cell in row[:precision])
             if self.empty(values):
                 first_row += 1
             else:
                 break
 
-        if first_row - 1 > 0:
+        if first_row >= 1:
             log.info(f"Removing first {first_row} empty rows")
-            ws.delete_rows(1, first_row - 1)
+            ws.delete_rows(1, first_row)
 
-        first_col = 0
-        for col in ws.columns:
-            values = (cell for cell in col[:precision])
-            if self.empty(values):
-                first_col += 1
-            else:
-                break
+        if self.conditional_formatting:
+            # We cannot iterate on columns in read only, not a problem.
+            last_col = ws.max_column
+            for col in reversed(list(ws.columns)):
+                values = (cell for cell in col[:precision])
+                if self.empty(values):
+                    last_col -= 1
+                else:
+                    break
 
-        if first_col - 1 > 0:
-            log.info(f"Removing first {first_col} empty columns")
-            ws.delete_cols(1, first_col - 1)
+            if last_col + 1 <= ws.max_column:
+                log.info(f"Removing empty columns after {last_col}")
+                ws.delete_cols(last_col + 1, ws.max_column - last_col)
+
+            first_col = 0
+            for col in ws.columns:
+                values = (cell for cell in col[:precision])
+                if self.empty(values):
+                    first_col += 1
+                else:
+                    break
+
+            if first_col >= 1:
+                log.info(f"Removing first {first_col} empty columns")
+                ws.delete_cols(1, first_col)
         log.debug(f"Finished trimming worsheet")
 
     def best_header_row(self, ws):
