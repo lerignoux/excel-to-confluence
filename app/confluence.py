@@ -20,7 +20,7 @@ class Confluence():
     def source_from_data(self, data, header="", template="default.html"):
         with open(f"confluence_templates/{template}") as f:
             res = f.read()
-        tables_source = res.format(header=header, table=self.table_source_from_data(data))
+        return res.format(header=header, table=self.table_source_from_data(data))
 
     def table_source_from_data(self, data, template="default_table.html"):
         with open(f"confluence_templates/{template}") as f:

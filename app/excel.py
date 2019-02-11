@@ -1,8 +1,8 @@
 import logging
 import re
 from openpyxl import load_workbook
+from openpyxl.reader.excle import ExcelReader
 from openpyxl.cell.cell import MergedCell
-from openpyxl.formatting.formatting import ConditionalFormattingList
 
 from colorsys import rgb_to_hls, hls_to_rgb
 
@@ -15,29 +15,54 @@ log = logging.getLogger("excel-to-confluence")
 
 class Excel():
 
-    def __init__(self, config, bytes):
+    def __init__(self, config, bytes, conditional_formatting=True):
+        log.debug(f"initializing Excel file")
         self.config = config
-        self.wb = load_workbook(bytes, read_only=False)  # Need write to list conditional formatting rules
+        self.conditional_formatting = conditional_formatting
+        read_only = not conditional_formatting
+        # Not using the default load to keep the reader in order to access full conditional formatting
+        reader = ExcelReader(bytes, read_only=read_only)
+        reader.read()
+        self.wb = reader.wb
+        # self.wb = load_workbook(bytes, read_only=read_only)  # Need write to access conditional formatting rules
+        log.debug(f"Workbook initialized, read_only={read_only}")
+
+    def get_full_conditional(self, ws):
+        for cf in self.parser.formatting:
+            for rule in cf.rules:
+                if rule.dxfId is not None:
+                    rule.dxf = self.ws.parent._differential_styles[rule.dxfId]
+        ws.all_conditional_formatting += rule
 
     def parse(self, sheet=None, header_row=None):
+        res = {
+            'sheets': self.get_sheets()
+        }
         if sheet is None:
-            sheet = self.wb.get_sheet_names()[0]
-        ws = self.wb.get_sheet_by_name(sheet)
+            return res
+        elif sheet not in res['sheets']:
+            sheets = res['sheets']
+            raise Exception(f'Sheet {sheet} not in workbook ({sheets})')
+        res['sheet'] = sheet
+
+        self.ws = self.wb.get_sheet_by_name(sheet)
+        if self.conditional_formatting:
+
+            self.conditional_formatting = self.get_full_conditional()
         self.trim(ws)
         if header_row is None:
             header_row = self.best_header_row(ws)
-        return {
-            'sheets': self.get_sheets(),
-            'data': self.parse_sheet(ws, header_row),
-            'header_row': header_row,
-            'sheet': sheet
-        }
+        res['header_row'] = header_row
+        res['data'] = self.parse_sheet(ws, header_row)
+        return res
 
     def empty(self, list):
         for cell in list:
+            if isinstance(cell, MergedCell):
+                return False
             if cell is not None and cell.value:
-                return True
-        return False
+                return False
+        return True
 
     def get_sheets(self):
         return self.wb.get_sheet_names()
@@ -50,55 +75,62 @@ class Excel():
 
     def get_max_col(self, ws):
         col = ws.max_col
-        while row > 0 and self.empty(ws, row, 'rows'):
-            row -= 1
-        return row
+        while col > 0 and self.empty(ws, col, 'rows'):
+            col -= 1
+        return col
 
     def trim(self, ws):
         log.debug(f"Starting trimming worsheet")
         precision = 20
         # We clean empty columns and lines from the end
-        max_row = ws.max_row
+        last_row = ws.max_row
         for row in reversed(list(ws.rows)):
             values = (cell for cell in row[:precision])
             if self.empty(values):
-                max_row -= 1
+                last_row -= 1
             else:
-                continue
-        ws.delete_rows(max_row, ws.max_row - max_row)
+                break
 
-        max_col = ws.max_column
+        if last_row + 1 <= ws.max_row:
+            log.info(f"Removing rows after {last_row}")
+            ws.delete_rows(last_row + 1, ws.max_row - last_row)
+
+        last_col = ws.max_column
         for col in reversed(list(ws.columns)):
             values = (cell for cell in col[:precision])
             if self.empty(values):
-                ws.delete_cols(-1)
+                last_col -= 1
             else:
-                continue
-        ws.delete_cols(max_col, ws.max_column - max_col)
+                break
+
+        if last_col + 1 <= ws.max_column:
+            log.info(f"Removing empty columns after {last_col}")
+            ws.delete_cols(last_col + 1, ws.max_column - last_col)
 
         # We clean empty columns and lines from the start
-        empty_rows = 0
+        first_row = 0
         for row in ws.rows:
             values = (cell for cell in row[:precision])
             if self.empty(values):
-                empty_rows += 1
-            else:
-                continue
-        if empty_rows:
-            log.info("removing first {empty_rows} empty rows")
-            ws.delete_rows(1, empty_rows)
-
-        empty_cols = 0
-        for col in ws.columns:
-            values = (cell for cell in col[:precision])
-            log.info(values)
-            if self.empty(values):
-                empty_cols += 1
+                first_row += 1
             else:
                 break
-        if empty_cols:
-            log.info("removing first {empty_cols} empty columns")
-            ws.delete_cols(1, empty_cols)
+
+        if first_row - 1 > 0:
+            log.info(f"Removing first {first_row} empty rows")
+            ws.delete_rows(1, first_row - 1)
+
+        first_col = 0
+        for col in ws.columns:
+            values = (cell for cell in col[:precision])
+            if self.empty(values):
+                first_col += 1
+            else:
+                break
+
+        if first_col - 1 > 0:
+            log.info(f"Removing first {first_col} empty columns")
+            ws.delete_cols(1, first_col - 1)
         log.debug(f"Finished trimming worsheet")
 
     def best_header_row(self, ws):
@@ -118,11 +150,12 @@ class Excel():
         return [self.cell_json(cell, ws=ws) for cell in rows]
 
     def cell_json(self, cell, ws):
+        cond_styles = self.cond_styles(cell, ws) if self.conditional_formatting else None
         return {
             'value': cell.value if not isinstance(cell, MergedCell) else "",
             'style': {
-                'color': self.font_color(cell, ws=ws),
-                'background-color': self.fill_color(cell, ws=ws),
+                'color': self.font_color(cell, ws=ws, cond_style=cond_styles),
+                'background-color': self.fill_color(cell, ws=ws, cond_style=cond_styles),
                 'font-size': cell.font.size if cell.font else 12,
                 'font-weight': 'bold' if cell.font and cell.font.bold else None,
                 'font-style': 'italic' if cell.font and cell.font.italic else None,
@@ -131,27 +164,55 @@ class Excel():
             }
         }
 
+    def cond_styles(self, cell, ws):
+        rules = []
+        for cond_format in ws.conditional_formatting:
+            if cell.coordinate in cond_format:
+                for rule in cond_format.rules:
+                    if self.match(rule, cell):
+                        rules.append(rule.dxf)
+        return rules[0] if rules else None
+
     def match(self, rule, cell):
         if rule.type == 'cellIs':
             if rule.operator == 'equal' and cell.value in rule.formula:
                 return True
+            if rule.operator == 'between':
+                low, high = rule.formula
+                low = low.strip("\"")
+                high = high.strip("\"")
+                # import rpdb; rpdb.Rpdb().set_trace()
+                try:
+                    return cell.value >= low and cell.value <= high
+                except (TypeError, ValueError):
+                    return False
         return False
 
-    def font_color(self, cell, ws):
-        potential = []
-        for cond_format in ws.conditional_formatting:
-            if cell.coordinate in cond_format:
-                log.debug(cond_format.rules)
-                potential.append(cond_format)
-                for rule in cond_format.rules:
-                    if self.match(rule, cell):
-                        import rpdb; rpdb.Rpdb().set_trace()
-        return self.excel_color(cell.font.color, default="#000") if cell.font else "#000"
+    def font_color(self, cell, ws, cond_style=None):
+        cond_color = self.excel_color(cond_style.font.color, default=None) if cond_style and cond_style.font else None
+        cell_color = self.excel_color(cell.font.color, default="#000") if cell.font else "#000"
+        return self.best_fill_color(cond_color, cell_color)
 
-    def fill_color(self, cell, ws):
-        return self.excel_color(cell.fill.fgColor, default=None) or self.excel_color(cell.fill.bgColor, default="#fff") if cell.fill else "#fff"
+    def best_fill_color(self, fg, bg):
+        bad_colors = [None, "#FFFFFF", "#000000"]
+        if fg not in bad_colors:
+            return fg
+        elif bg not in bad_colors:
+            return bg
+        elif bad_colors.index(fg) > bad_colors.index(bg):
+            return bg
+        return fg
 
-    def excel_color(self, color, default="#000"):
+    def fill_color(self, cell, ws, cond_style=None):
+        fg_cond_color = self.excel_color(cond_style.fill.fgColor, default=None) if cond_style and cond_style.fill else None
+        bg_cond_color = self.excel_color(cond_style.fill.bgColor, default=None) if cond_style and cond_style.fill else None
+        cond_color = self.best_fill_color(fg_cond_color, bg_cond_color)
+        fg_cell_color = self.excel_color(cell.fill.fgColor, default=None) if cell.fill else None
+        bg_cell_color = self.excel_color(cell.fill.bgColor, default="#ffffff") if cell.fill else "#ffffff"
+        cell_color = self.best_fill_color(fg_cell_color, bg_cell_color)
+        return self.best_fill_color(cond_color, cell_color)
+
+    def excel_color(self, color, default="#000000"):
         if color is None:
             # Dumb dirty fix to handle the library weird design
             return default
@@ -161,8 +222,8 @@ class Excel():
             # Dumb dirty fix to handle the library weird design
             return default
         try:
-            res = re.sub("^FF", "#", color.rgb)
-            return res
+            if re.search("^\w{8}$", color.rgb):
+                return re.sub(r"^\w\w", "#", color.rgb)
         except TypeError:
             import rpdb; rpdb.Rpdb().set_trace()
             log.error(f"could not interpret {color.rgb} ({color.rgb.__class__})")
