@@ -1,7 +1,6 @@
 import argparse
 import json
 import logging
-from io import BytesIO
 from flask import Flask, render_template, request
 
 from confluence import Confluence
@@ -45,21 +44,26 @@ def initialize():
 def index():
     return render_template('index.html')
 
+@app.route('/login_dialog.html', methods=['GET', 'POST'])
+def login_dialog():
+    return render_template('login_dialog.html')
+
 
 @app.route("/excel", methods=['POST'])
 def excel():
     """
     Post an excel file and fetch it's configuration
     """
-    sheet = None
-    header_row = None
     excel_file = request.files['file']
     sheet = request.values.get('sheet')
+    header_row = None
     try:
         header_row = int(request.values.get('header_row'))
     except TypeError:
-        header_row = None
-    excel = Excel(get_config(), excel_file._file)
+        pass
+    conditional_formatting = False if request.values.get('conditional_formatting') == 'false' else True
+    log.info(f"conditional formatting {conditional_formatting}")
+    excel = Excel(get_config(), excel_file._file, conditional_formatting=conditional_formatting)
     confluence = Confluence(get_config())
     content = excel.parse(sheet=sheet, header_row=header_row)
     content['header'] = request.values.get('header')

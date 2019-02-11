@@ -2,10 +2,11 @@
 
   'use strict';
 
-  angular.module('MyApp').controller('MainController', ['$scope', '$mdToast', '$templateRequest', '$sce', '$timeout', 'ApiService',
-    function($scope, $mdToast, $templateRequest, $sce, $timeout, ApiService) {
+  angular.module('MyApp').controller('MainController', ['$scope', '$mdToast', '$templateRequest', '$sce', '$timeout', 'ApiService', 'ConfluenceService',
+    function($scope, $mdToast, $templateRequest, $sce, $timeout, ApiService, ConfluenceService) {
 
       $scope.ApiService = ApiService;
+      $scope.ConfluenceService = ConfluenceService;
 
       $scope.confluenceMode = 'upload';
       $scope.loading = 0;
@@ -45,6 +46,7 @@
           sheets: [],
           sheet: undefined,
           headerRow: undefined,
+          conditional_formatting: true
         }
         $scope.confluence = {
           pageId: undefined,
@@ -67,9 +69,14 @@
 
       $scope.checkWorkbook = function() {
         var conf = {
+          conditional_formatting: $scope.excel.conditional_formatting
         }
         if ($scope.excel.sheet !== undefined){
           conf.sheet = $scope.excel.sheet
+        }
+        else {
+          // We just want the list of sheets no need for conditional formatting yet
+          conf.conditional_formatting = false
         }
         if ($scope.excel.header_row !== undefined){
           conf.header_row = $scope.excel.header_row
@@ -93,8 +100,8 @@
         $timeout(function() {$scope.hovering = false; $scope.$apply();}, 3000);
       }, false);
 
-      $scope.confluenceUpload = function(ev) {
-        $scope.ApiService.post("confluence", ev, {'data': $scope.data, 'page_id': $scope.confluence.pageId, 'page_title': $scope.confluence.pageTitle})
+      $scope.uploadConfluencePage = function(ev) {
+        $scope.ConfluenceService.updateConfluencePage(ev, $scope.confluence.pageId, $scope.confluence.pageTitle, $scope.confluence.source)
       }
 
       $scope.showErrorToast = function(message) {
