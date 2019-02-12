@@ -104,7 +104,7 @@
       }
 
       $scope.toClipboard = function() {
-          let data = document.getElementById("confluenceData").firstChild.data,
+          let data = document.getElementById("confluence-data").firstChild.data,
               copyFrom = document.createElement("textarea");
           document.body.appendChild(copyFrom);
           copyFrom.textContent = data;
