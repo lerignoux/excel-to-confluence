@@ -62,7 +62,6 @@ def excel():
     except TypeError:
         pass
     conditional_formatting = False if request.values.get('conditional_formatting') == 'false' else True
-    log.info(f"conditional formatting {conditional_formatting}")
     excel = Excel(get_config(), excel_file._file, conditional_formatting=conditional_formatting)
     confluence = Confluence(get_config())
     content = excel.parse(sheet=sheet, header_row=header_row)

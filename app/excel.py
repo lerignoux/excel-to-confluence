@@ -20,6 +20,7 @@ class Excel():
         self.config = config
         self.conditional_formatting = conditional_formatting
         self.wb = load_workbook(bytes, read_only=read_only)  # Need write to access conditional formatting rules
+        self.ws = None
         log.debug(f"Workbook initialized")
 
     def parse(self, sheet=None, header_row=None):
@@ -56,65 +57,51 @@ class Excel():
         log.debug(f"Starting trimming worsheet")
         precision = 20
         # We clean empty columns and lines from the end
-        last_row = ws.max_row
+        self.first_row = 1
+        self.last_row = ws.max_row
         for row in reversed(list(ws.rows)):
-            values = (cell for cell in row[:precision])
-            if self.empty(values):
-                last_row -= 1
+            cells = (cell for cell in row[:precision])
+            if self.empty(cells):
+                self.last_row -= 1
             else:
                 break
-
-        if last_row + 1 <= ws.max_row:
-            log.info(f"Removing rows after {last_row}")
-            ws.delete_rows(last_row + 1, ws.max_row - last_row)
-
         # We clean empty columns and lines from the start
-        first_row = 0
         for row in ws.iter_rows():
-            values = (cell for cell in row[:precision])
-            if self.empty(values):
-                first_row += 1
+            cells = (cell for cell in row[:precision])
+            if self.empty(cells):
+                self.first_row += 1
             else:
                 break
 
-        if first_row >= 1:
-            log.info(f"Removing first {first_row} empty rows")
-            ws.delete_rows(1, first_row)
+        # We clean columns
+        for col in range(1, ws.max_column + 1):
+            cells = []
+            for row in ws.iter_rows(max_row=precision):
+                cells.append(row[col-1])
+            if not self.empty(cells):
+                break
+        self.first_col = col
 
-        if self.conditional_formatting:
-            # We cannot iterate on columns in read only, not a problem.
-            last_col = ws.max_column
-            for col in reversed(list(ws.columns)):
-                values = (cell for cell in col[:precision])
-                if self.empty(values):
-                    last_col -= 1
-                else:
-                    break
+        for col in range(ws.max_column, 0, -1):
+            cells = []
+            for row in ws.iter_rows(max_row=precision):
+                cells.append(row[col-1])
+            if not self.empty(cells):
+                break
+        self.last_col = col
 
-            if last_col + 1 <= ws.max_column:
-                log.info(f"Removing empty columns after {last_col}")
-                ws.delete_cols(last_col + 1, ws.max_column - last_col)
-
-            first_col = 0
-            for col in ws.columns:
-                values = (cell for cell in col[:precision])
-                if self.empty(values):
-                    first_col += 1
-                else:
-                    break
-
-            if first_col >= 1:
-                log.info(f"Removing first {first_col} empty columns")
-                ws.delete_cols(1, first_col)
-        log.debug(f"Finished trimming worsheet")
-
-    def best_header_row(self, ws):
-        return 1
+        log.debug(f"Finished trimming worsheet, rows: {self.first_row} -> {self.last_row}, cols: {self.first_col} -> {self.last_col}")
 
     def parse_sheet(self, ws, header_row):
+        iterator = ws.iter_rows(
+            min_row=self.first_row,
+            max_row=self.last_row,
+            min_col=self.first_col,
+            max_col=self.last_col
+        )
         return {
             ws.title: [
-                self.get_row(ws, row) for row in list(ws.iter_rows())[header_row-1:]
+                self.get_row(ws, row) for row in list(iterator)
             ]
         }
 
