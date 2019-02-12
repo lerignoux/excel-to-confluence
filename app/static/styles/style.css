@@ -127,3 +127,8 @@ pre {
 .md-tooltip {
     height: auto;
 }
+
+.help-link {
+  margin: auto;
+  line-height: 100%;
+}
