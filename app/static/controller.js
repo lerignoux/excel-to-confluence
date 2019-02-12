@@ -49,7 +49,7 @@
           sheets: [],
           sheet: undefined,
           headerRow: undefined,
-          conditional_formatting: true
+          conditional_formatting: false
         }
         $scope.confluence = {
           pageId: undefined,
