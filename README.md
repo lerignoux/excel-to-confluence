@@ -25,17 +25,17 @@ copy and fill both `app/config.json` and `nginx/nginx.conf` from their respectiv
 docker-compose up
 ```
 
-## Usage
+#### Usage
 After starting the container:  
 * just go to the web page (*<server_name>:5443*,  port 5443 if ssl if https not configured)  
 * Follow above user documentation
 
-## Dev
+#### Dev
 if you wish to spawn the app container standalone:
 ```
 docker run --rm --name excel-to-confluence -v ./app:/app -p 5000:5000 excel-to-confluence
 ```
 
-## Contributions
+#### Contributions
 Contribution are more than welcome using regular merge requests process.
 Please follow PEP8 standard as much as possible
