@@ -14,8 +14,7 @@
       $scope.data = undefined;
       $scope.excel = {
         sheets: [],
-        sheet: undefined,
-        headerRow: undefined,
+        sheet: undefined
       }
       $scope.confluence = {
         pageId: undefined,
@@ -82,12 +81,8 @@
           // We just want the list of sheets no need for conditional formatting yet
           conf.conditional_formatting = false
         }
-        if ($scope.excel.header_row !== undefined){
-          conf.header_row = $scope.excel.header_row
-        }
         ApiService.post_file("excel", $scope.file, conf, function(data) {
           $scope.excel.sheets = data.sheets;
-          $scope.excel.header_row = data.header_row;
           $scope.data = data.data;
           $scope.confluence.source = data.source;
         })

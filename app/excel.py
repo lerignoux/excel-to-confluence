@@ -23,7 +23,7 @@ class Excel():
         self.ws = None
         log.debug(f"Workbook initialized")
 
-    def parse(self, sheet=None, header_row=None):
+    def parse(self, sheet=None):
         res = {
             'sheets': self.get_sheets()
         }
@@ -36,10 +36,7 @@ class Excel():
 
         ws = self.wb.get_sheet_by_name(sheet)
         self.trim(ws)
-        if header_row is None:
-            header_row = self.best_header_row(ws)
-        res['header_row'] = header_row
-        res['data'] = self.parse_sheet(ws, header_row)
+        res['data'] = self.parse_sheet(ws)
         return res
 
     def empty(self, list):
@@ -92,7 +89,7 @@ class Excel():
 
         log.debug(f"Finished trimming worsheet, rows: {self.first_row} -> {self.last_row}, cols: {self.first_col} -> {self.last_col}")
 
-    def parse_sheet(self, ws, header_row):
+    def parse_sheet(self, ws):
         iterator = ws.iter_rows(
             min_row=self.first_row,
             max_row=self.last_row,

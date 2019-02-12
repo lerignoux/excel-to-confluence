@@ -65,11 +65,6 @@
             </md-select>
           </md-input-container>
           <md-input-container>
-            <label>Header Row</label>
-            <input ng-model="excel.header_row" ng-change="checkWorkbook()" type="number" ng-disabled="busy()">
-            </input>
-          </md-input-container>
-          <md-input-container>
             <md-switch ng-model="excel.conditional_formatting" aria-label="conditional_formatting" ng-change="checkWorkbook()" ng-disabled="busy()">
               Load conditional formatting (slower)
             </md-switch>

@@ -56,15 +56,10 @@ def excel():
     """
     excel_file = request.files['file']
     sheet = request.values.get('sheet')
-    header_row = None
-    try:
-        header_row = int(request.values.get('header_row'))
-    except TypeError:
-        pass
     conditional_formatting = False if request.values.get('conditional_formatting') == 'false' else True
     excel = Excel(get_config(), excel_file._file, conditional_formatting=conditional_formatting)
     confluence = Confluence(get_config())
-    content = excel.parse(sheet=sheet, header_row=header_row)
+    content = excel.parse(sheet=sheet)
     content['header'] = request.values.get('header')
     content['source'] = confluence.source_from_data(content.get('data', {}), header=content.get('header'))
     return json.dumps(content)
