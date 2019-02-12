@@ -56,9 +56,9 @@
     </md-toolbar>
 
     <md-card-content>
-      <div class="block" layout-gt-sm="row">
+      <div layout-gt-sm="row" layout-padding>
         <md-input-container>
-          <label>sheet</label>
+          <label>sheet selection</label>
           <md-select ng-model="excel.sheet" ng-change="checkWorkbook()" ng-disabled="busy()">
             <md-option ng-repeat="name in excel.sheets" ng-value="name" ng-selected="data[name] !== undefined">
               {{name}}
@@ -66,8 +66,14 @@
           </md-select>
         </md-input-container>
         <md-input-container>
+          <md-tooltip>
+            The request can take up to minutes according to the size of the Excel file.<br/>
+            Only basice Cell equals and between conditional formatting is supported<br/>
+            Multiple conditional formatting on a same range is not supported by the library :'(
+          </md-tooltip>
+          <label>Conditional formatting</label>
           <md-switch ng-model="excel.conditional_formatting" aria-label="conditional_formatting" ng-change="checkWorkbook()" ng-disabled="busy()">
-            Load conditional formatting (slower)
+             {{excel.conditional_formatting ? 'load' : 'no'}} conditional formatting (slower)
           </md-switch>
         </md-input-container>
       </div>

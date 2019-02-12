@@ -123,3 +123,7 @@ pre {
  	border: 1px solid #888888;
 	padding: 4px;
 }
+
+.md-tooltip {
+    height: auto;
+}
