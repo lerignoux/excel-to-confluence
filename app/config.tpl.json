@@ -2,10 +2,5 @@
   "debug": false,
   "api": {
     "secret_key": "<to fill>"
-  },
-  "confluence": {
-    "host": "",
-    "login": "",
-    "password": ""
   }
 }
