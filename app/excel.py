@@ -74,6 +74,9 @@ class Excel():
         for col in range(1, ws.max_column + 1):
             cells = []
             for row in ws.iter_rows(max_row=precision):
+                if not row:
+                    # Row is hidden, we ignore it and continues=
+                    continue
                 cells.append(row[col-1])
             if not self.empty(cells):
                 break
@@ -82,6 +85,9 @@ class Excel():
         for col in range(ws.max_column, 0, -1):
             cells = []
             for row in ws.iter_rows(max_row=precision):
+                if not row:
+                    # Row is hidden, we ignore it and continues=
+                    continue
                 cells.append(row[col-1])
             if not self.empty(cells):
                 break
