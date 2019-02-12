@@ -2,8 +2,8 @@
 
   'use strict';
 
-  angular.module('MyApp').controller('MainController', ['$scope', '$mdToast', '$templateRequest', '$sce', '$timeout', 'ApiService', 'ConfluenceService',
-    function($scope, $mdToast, $templateRequest, $sce, $timeout, ApiService, ConfluenceService) {
+  angular.module('MyApp').controller('MainController', ['$scope', '$mdToast', '$templateRequest', '$sce', '$timeout', '$cookies', 'ApiService', 'ConfluenceService',
+    function($scope, $mdToast, $templateRequest, $sce, $timeout, $cookies, ApiService, ConfluenceService) {
 
       $scope.ApiService = ApiService;
       $scope.ConfluenceService = ConfluenceService;
@@ -14,12 +14,52 @@
       $scope.data = undefined;
       $scope.excel = {
         sheets: [],
-        sheet: undefined
+        sheet: undefined,
+        conditionalFormatting: false
       }
       $scope.confluence = {
         pageId: undefined,
         pageTitle: undefined,
         header: ""
+      }
+
+      $scope.conf_name = function() {
+        return $scope.filename + ':' + $scope.excel.sheet
+      }
+
+      $scope.load_config = function() {
+        try {
+          let conf = $cookies.getObject($scope.conf_name())
+          if (conf !== undefined) {
+            $scope.excel.conditionalFormatting = conf.conditionalFormatting ? conf.conditionalFormatting : false ;
+            $scope.confluence.pageId = conf.confluencePageId ? conf.confluencePageId: undefined;
+            $scope.confluence.pageTitle = conf.confluencePageTitle ? conf.confluencePageTitle : undefined;
+            $scope.confluence.header = conf.confluenceHeader ? conf.confluenceHeader : "";
+          }
+          else {
+            $scope.excel.conditionalFormatting = false;
+            $scope.confluence.pageId = undefined;
+            $scope.confluence.pageTitle = undefined;
+            $scope.confluence.header = "";
+          }
+        }
+        catch (e){
+          console.log("Could not log proper configuration, ignoring: " + e);
+          $scope.excel.conditionalFormatting = false;
+          $scope.confluence.pageId = undefined;
+          $scope.confluence.pageTitle = undefined;
+          $scope.confluence.header = "";
+        }
+      }
+
+      $scope.save_config = function() {
+        let conf = {
+          conditionalFormatting: $scope.excel.conditionalFormatting,
+          confluencePageId: $scope.confluence.pageId,
+          confluencePageTitle: $scope.confluence.pageTitle,
+          confluenceHeader: $scope.confluence.header
+        }
+        $cookies.putObject($scope.conf_name(), conf);
       }
 
       $scope.busy = function(){
@@ -48,8 +88,7 @@
         $scope.excel = {
           sheets: [],
           sheet: undefined,
-          headerRow: undefined,
-          conditional_formatting: false
+          conditionalFormatting: false
         }
         $scope.confluence = {
           pageId: undefined,
@@ -72,14 +111,22 @@
 
       $scope.checkWorkbook = function() {
         var conf = {
-          conditional_formatting: $scope.excel.conditional_formatting
+          conditional_formatting: false
         }
-        if ($scope.excel.sheet !== undefined){
-          conf.sheet = $scope.excel.sheet
-        }
-        else {
-          // We just want the list of sheets no need for conditional formatting yet
-          conf.conditional_formatting = false
+        ApiService.post_file("excel", $scope.file, conf, function(data) {
+          $scope.excel.sheets = data.sheets;
+        })
+      }
+
+      $scope.selectWorksheet = function() {
+        $scope.load_config();
+        $scope.checkWorksheet();
+      }
+
+      $scope.checkWorksheet = function() {
+        var conf = {
+          conditional_formatting: $scope.excel.conditionalFormatting,
+          sheet: $scope.excel.sheet
         }
         ApiService.post_file("excel", $scope.file, conf, function(data) {
           $scope.excel.sheets = data.sheets;
@@ -100,6 +147,7 @@
       }, false);
 
       $scope.uploadConfluencePage = function(ev) {
+        $scope.save_config()
         $scope.ConfluenceService.updateConfluencePage(ev, $scope.confluence.pageId, $scope.confluence.pageTitle, $scope.confluence.source)
       }
 

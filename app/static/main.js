@@ -1,4 +1,4 @@
-var app = angular.module('MyApp', ['ngMaterial', 'ApiService', 'ConfluenceService'])
+var app = angular.module('MyApp', ['ngMaterial', 'ngCookies', 'ApiService', 'ConfluenceService'])
 .config(function($mdThemingProvider) {
   $mdThemingProvider.theme('default')
     .dark()
