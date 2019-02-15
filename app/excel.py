@@ -24,6 +24,7 @@ class Excel():
         log.debug(f"Workbook initialized")
 
     def parse(self, sheet=None):
+        log.info(f"Starting parsing sheet {sheet}")
         res = {
             'sheets': self.get_sheets()
         }
@@ -51,7 +52,7 @@ class Excel():
         return self.wb.get_sheet_names()
 
     def trim(self, ws):
-        log.debug(f"Starting trimming worsheet")
+        log.info(f"Starting trimming worsheet")
         precision = 20
         # We clean empty columns and lines from the end
         self.first_row = 1
