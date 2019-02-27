@@ -33,6 +33,10 @@ class Confluence():
 
     def html_value(self, cell):
         value = cell.get('value')
+        try:
+            value = value.replace("&", "&amp;")
+        except AttributeError:
+            pass
         return value if value is not None else ""
 
     def table_source_from_data(self, data, template="default_table.html"):
