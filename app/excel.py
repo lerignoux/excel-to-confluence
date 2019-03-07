@@ -19,7 +19,7 @@ class Excel():
         log.debug(f"initializing Excel file, read_only={read_only}")
         self.config = config
         self.conditional_formatting = conditional_formatting
-        self.wb = load_workbook(bytes, read_only=read_only)  # Need write to access conditional formatting rules
+        self.wb = load_workbook(bytes, read_only=read_only, data_only=True)  # Need write to access conditional formatting rules
         self.ws = None
         log.debug(f"Workbook initialized")
 
