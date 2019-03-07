@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+from datetime import datetime
 from flask import Flask, render_template, request
 
 from confluence import Confluence
@@ -24,6 +25,14 @@ def get_config():
 app = Flask(__name__)
 
 app.secret_key = get_config()['api']['secret_key']
+
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Type {type(obj)} not serializable")
 
 
 @app.before_first_request
@@ -62,7 +71,7 @@ def excel():
     content = excel.parse(sheet=sheet)
     content['header'] = request.values.get('header')
     content['source'] = confluence.source_from_data(content.get('data', {}), header=content.get('header'))
-    return json.dumps(content)
+    return json.dumps(content, default=json_serial)
 
 
 if __name__ == "__main__":
