@@ -53,6 +53,7 @@ def initialize():
 def index():
     return render_template('index.html')
 
+
 @app.route('/login_dialog.html', methods=['GET', 'POST'])
 def login_dialog():
     return render_template('login_dialog.html')

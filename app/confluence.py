@@ -35,7 +35,7 @@ class Confluence():
         value = cell.get('value')
         try:
             value = value.replace("&", "&amp;")
-        except AttributeError:
+        except (AttributeError, TypeError):
             pass
         return value if value is not None else ""
 
